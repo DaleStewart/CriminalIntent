@@ -5,11 +5,12 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
@@ -20,8 +21,8 @@ class CrimeListFragment: Fragment() {
     private lateinit var crimeRecyclerView: RecyclerView
     private var adapter: CrimeAdapter? = null
 
-    private val crimeListViewModel: CrimeListViewModel by lazy{
-        ViewModelProviders.of(this).get(crimeListViewModel::class.java)
+    private val crimeListViewModel: CrimeListViewModel by lazy {
+        ViewModelProviders.of(this).get(CrimeListViewModel::class.java)
     }
 
 
@@ -41,8 +42,8 @@ class CrimeListFragment: Fragment() {
         crimeRecyclerView = view.findViewById(R.id.crime_recycle_view) as RecyclerView
         crimeRecyclerView.layoutManager = LinearLayoutManager(context)//need a layout manager
 
-       return view
         updateUI()
+       return view
     }
 
     //this is the proverbial 'first domino'
@@ -63,6 +64,7 @@ class CrimeListFragment: Fragment() {
 
         private val titleTextView: TextView = itemView.findViewById(R.id.crime_title)
         private val dateTextView: TextView = itemView.findViewById(R.id.crime_date)
+        private val solvedImageView: ImageView = itemView.findViewById(R.id.crime_solved)
 
         init {
             itemView.setOnClickListener(this)
@@ -72,6 +74,11 @@ class CrimeListFragment: Fragment() {
             this.crime = crime
             titleTextView.text = this.crime.title
             dateTextView.text = this.crime.date.toString()
+            solvedImageView.visibility = if(crime.isSolved){
+                View.VISIBLE
+            } else{
+                View.GONE
+            }
         }
 
         override fun onClick(v: View){
