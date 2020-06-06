@@ -3,9 +3,7 @@ package com.bignerdranch.android.criminalintent
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -35,19 +33,23 @@ class CrimeListFragment: Fragment() {
     private val crimeListViewModel: CrimeListViewModel by lazy {
         ViewModelProviders.of(this).get(CrimeListViewModel::class.java)
     }
+    //----------------------------------------------------------------------------------------------
 
+    //----------------------------------------------------------------------------------------------
     override fun onAttach(context: Context) {
         super.onAttach(context)
         callbacks = context as Callbacks
     }
+    //----------------------------------------------------------------------------------------------
 
-    //==============================================================================================
-    //CC1: depreciated code, left in source for reference
-    /*override fun onCreate(savedInstanceState: Bundle?){
+    //----------------------------------------------------------------------------------------------
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(TAG, "Total crimes: ${crimeListViewModel.crimes.size}")
-    }*/
+        setHasOptionsMenu(true)
+    }
+    //----------------------------------------------------------------------------------------------
 
+    //----------------------------------------------------------------------------------------------
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -63,7 +65,9 @@ class CrimeListFragment: Fragment() {
        //updateUI() //CC1
        return view
     }
+    //----------------------------------------------------------------------------------------------
 
+    //----------------------------------------------------------------------------------------------
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         crimeListViewModel.crimeListLiveData.observe(
@@ -76,12 +80,22 @@ class CrimeListFragment: Fragment() {
             }
         )
     }
+    //----------------------------------------------------------------------------------------------
 
+    //----------------------------------------------------------------------------------------------
     override fun onDetach() {
         super.onDetach()
         callbacks = null
     }
+    //----------------------------------------------------------------------------------------------
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.fragment_crime_list, menu)
+    }
+
+
+    //----------------------------------------------------------------------------------------------
     //this is the proverbial 'first domino'
     //when it is called the crime list is snagged from the view model and passed to
     //an adapter through the constructor
@@ -91,6 +105,7 @@ class CrimeListFragment: Fragment() {
         adapter = CrimeAdapter(crimes)
         crimeRecyclerView.adapter = adapter
     }
+    //----------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------
     //CLASS: crime holder is an extension of recyclerview.viewholder for holding itemViews
@@ -150,10 +165,11 @@ class CrimeListFragment: Fragment() {
     }
     //----------------------------------------------------------------------------------------------
 
-
+    //----------------------------------------------------------------------------------------------
     companion object {
         fun newInstance(): CrimeListFragment{
             return CrimeListFragment()
         }
     }
+    //----------------------------------------------------------------------------------------------
 }
