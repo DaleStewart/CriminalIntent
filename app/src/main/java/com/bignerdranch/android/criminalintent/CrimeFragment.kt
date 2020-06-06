@@ -12,6 +12,7 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProviders
 import java.util.*
 
 private const val ARG_CRIME_ID = "crime_id"
@@ -19,19 +20,28 @@ private const val TAG = "CrimeFragment"
 
 class CrimeFragment  : Fragment(){
 
-    private lateinit var crime : Crime
+    //class properties
+    private lateinit var crime : Crime//local state, edits user is currently making
     private lateinit var titleField: EditText
     private lateinit var dateButton: Button
     private lateinit var solvedCheckBox: CheckBox
 
+    //view model to hold our data, nessesary since device rotation might mess things up
+    private val crimeDetailViewModel: CrimeDetailViewModel by lazy {
+        ViewModelProviders.of(this).get(CrimeDetailViewModel:: class.java)
+    }
+
+    //----------------------------------------------------------------------------------------------
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         crime = Crime()
         //get a reference to the UUID of the crime we must load from the database
         val crimeId: UUID = arguments?.getSerializable(ARG_CRIME_ID) as UUID
-        Log.d(TAG, "arguments bundle crime ID: $crimeId")
+        crimeDetailViewModel.loadCrime(crimeId)
     }
+    //----------------------------------------------------------------------------------------------
 
+    //----------------------------------------------------------------------------------------------
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -48,7 +58,23 @@ class CrimeFragment  : Fragment(){
         }
         return view
     }
+    //----------------------------------------------------------------------------------------------
 
+    //----------------------------------------------------------------------------------------------
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?){
+        super.onViewCreated(view, savedInstanceState)
+        crimeDetailViewModel.crimeLiveData.observe(
+            viewLifecycleOwner,
+            androidx.lifecycle.Observer { crime ->
+            crime?.let {
+                this.crime = crime
+                updateUI()
+            }}
+        )
+    }
+    //----------------------------------------------------------------------------------------------
+
+    //----------------------------------------------------------------------------------------------
     override fun onStart() {
         super.onStart()
 
@@ -73,7 +99,20 @@ class CrimeFragment  : Fragment(){
             }
         }
     }
+    //----------------------------------------------------------------------------------------------
 
+    //----------------------------------------------------------------------------------------------
+    private  fun updateUI(){
+        titleField.setText(crime.title)
+        dateButton.text = crime.date.toString()
+        solvedCheckBox.apply {
+            isChecked = crime.isSolved
+            jumpDrawablesToCurrentState()//skip the animaion if it is set by UpdateUI
+        }
+    }
+    //----------------------------------------------------------------------------------------------
+
+    //----------------------------------------------------------------------------------------------
     companion object {
         fun newInstance(crimeId: UUID): CrimeFragment{
             val args = Bundle().apply {
@@ -84,5 +123,6 @@ class CrimeFragment  : Fragment(){
             }
         }
     }
+    //----------------------------------------------------------------------------------------------
 
 }
