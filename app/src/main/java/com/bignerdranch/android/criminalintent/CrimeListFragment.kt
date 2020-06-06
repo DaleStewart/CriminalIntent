@@ -9,6 +9,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,17 +20,18 @@ private const val TAG = "CrimeListFragment"
 class CrimeListFragment: Fragment() {
 
     private lateinit var crimeRecyclerView: RecyclerView
-    private var adapter: CrimeAdapter? = null
+    private var adapter: CrimeAdapter? = CrimeAdapter(emptyList())
 
     private val crimeListViewModel: CrimeListViewModel by lazy {
         ViewModelProviders.of(this).get(CrimeListViewModel::class.java)
     }
 
-
-    override fun onCreate(savedInstanceState: Bundle?){
+    //==============================================================================================
+    //CC1: depreciated code, left in source for reference
+    /*override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         Log.d(TAG, "Total crimes: ${crimeListViewModel.crimes.size}")
-    }
+    }*/
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,17 +43,31 @@ class CrimeListFragment: Fragment() {
         //get a reference to our recycler view and set up a layout manager
         crimeRecyclerView = view.findViewById(R.id.crime_recycle_view) as RecyclerView
         crimeRecyclerView.layoutManager = LinearLayoutManager(context)//need a layout manager
+        crimeRecyclerView.adapter = adapter//set the recycler view adapter
 
-        updateUI()
+       //updateUI() //CC1
        return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        crimeListViewModel.crimeListLiveData.observe(
+            viewLifecycleOwner,
+            Observer { crimes ->
+                crimes?.let {
+                    Log.i(TAG, "Got crimes $crimes.size")
+                    updateUI(crimes)
+                }
+            }
+        )
     }
 
     //this is the proverbial 'first domino'
     //when it is called the crime list is snagged from the view model and passed to
     //an adapter through the constructor
     //lastly the recyclerview adapter property is set to the adapter we just made
-    private fun updateUI(){
-        val crimes = crimeListViewModel.crimes
+    private fun updateUI(crimes: List<Crime>){
+       //val crimes = crimeListViewModel.crimes//CC1
         adapter = CrimeAdapter(crimes)
         crimeRecyclerView.adapter = adapter
     }
