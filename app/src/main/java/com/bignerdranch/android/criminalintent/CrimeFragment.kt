@@ -2,8 +2,10 @@ package com.bignerdranch.android.criminalintent
 
 import android.nfc.Tag
 import android.os.Bundle
+import android.provider.Settings.System.DATE_FORMAT
 import android.text.Editable
 import android.text.TextWatcher
+import android.text.format.DateFormat
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -130,6 +132,23 @@ class CrimeFragment  : Fragment(), DatePickerFragment.Callbacks{
         }
     }
     //----------------------------------------------------------------------------------------------
+
+    private fun getCrimeReport(): String {
+        val solvedString = if(crime.isSolved){
+            getString(R.string.crime_report_solved)
+        } else{
+            getString(R.string.crime_report_unsolved)
+        }
+
+        val dateString = DateFormat.format(DATE_FORMAT, crime.date).toString()
+        var suspect = if (crime.suspect.isBlank()){
+            getString(R.string.crime_report_no_suspect)
+        }else{
+            getString(R.string.crime_report_suspect, crime.suspect)
+        }
+
+        return getString(R.string.crime_report, crime.title, dateString, solvedString, suspect)
+    }
 
     //----------------------------------------------------------------------------------------------
     companion object {
