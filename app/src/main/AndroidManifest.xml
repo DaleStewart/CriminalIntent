@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bignerdranch.android.criminalintent">
 
+    <uses-feature android:name="android.hardware.camera"
+        android:required="false"/>
+
     <application
         android:name=".CriminalIntentApplication"
         android:allowBackup="true"
