@@ -125,7 +125,9 @@ class CrimeFragment  : Fragment(), DatePickerFragment.Callbacks{
                     Intent.EXTRA_SUBJECT,
                     getString(R.string.crime_report_subject))
             }.also { intent ->
-                startActivity(intent)
+                val chooserIntent =
+                    Intent.createChooser(intent, getString(R.string.send_report))
+                startActivity(chooserIntent)
             }
         }
     }
