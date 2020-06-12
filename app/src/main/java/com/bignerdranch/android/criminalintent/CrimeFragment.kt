@@ -1,5 +1,6 @@
 package com.bignerdranch.android.criminalintent
 
+import android.content.Intent
 import android.nfc.Tag
 import android.os.Bundle
 import android.provider.Settings.System.DATE_FORMAT
@@ -29,6 +30,7 @@ class CrimeFragment  : Fragment(), DatePickerFragment.Callbacks{
     private lateinit var titleField: EditText
     private lateinit var dateButton: Button
     private lateinit var solvedCheckBox: CheckBox
+    private lateinit var reportButton: Button
 
     //view model to hold our data, nessesary since device rotation might mess things up
     private val crimeDetailViewModel: CrimeDetailViewModel by lazy {
@@ -42,6 +44,7 @@ class CrimeFragment  : Fragment(), DatePickerFragment.Callbacks{
         //get a reference to the UUID of the crime we must load from the database
         val crimeId: UUID = arguments?.getSerializable(ARG_CRIME_ID) as UUID
         crimeDetailViewModel.loadCrime(crimeId)
+        reportButton = view?.findViewById(R.id.crime_report) as Button
     }
     //----------------------------------------------------------------------------------------------
 
@@ -110,6 +113,19 @@ class CrimeFragment  : Fragment(), DatePickerFragment.Callbacks{
             DatePickerFragment.newInstance(crime.date).apply {
                 setTargetFragment(this@CrimeFragment, REQUEST_DATE)
                 show(this@CrimeFragment.requireFragmentManager(), DIALOG_DATE)
+            }
+        }
+
+        //Implicit intent sent from this click listener
+        reportButton.setOnClickListener{
+            Intent (Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, getCrimeReport())
+                putExtra(
+                    Intent.EXTRA_SUBJECT,
+                    getString(R.string.crime_report_subject))
+            }.also { intent ->
+                startActivity(intent)
             }
         }
     }
