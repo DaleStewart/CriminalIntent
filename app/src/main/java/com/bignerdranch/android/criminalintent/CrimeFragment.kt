@@ -2,25 +2,22 @@ package com.bignerdranch.android.criminalintent
 
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import android.net.Uri
 
-import android.nfc.Tag
 import android.os.Bundle
 import android.provider.ContactsContract
 
 import android.text.Editable
 import android.text.TextWatcher
 import android.text.format.DateFormat
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.EditText
+import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
-import java.net.URI
 import java.util.*
 
 private const val ARG_CRIME_ID = "crime_id"
@@ -39,6 +36,8 @@ class CrimeFragment  : Fragment(), DatePickerFragment.Callbacks{
     private lateinit var solvedCheckBox: CheckBox
     private lateinit var reportButton: Button
     private lateinit var suspectButton: Button
+    private lateinit var photoButton: ImageButton
+    private lateinit var photoView: ImageView
 
     //view model to hold our data, nessesary since device rotation might mess things up
     private val crimeDetailViewModel: CrimeDetailViewModel by lazy {
@@ -68,6 +67,8 @@ class CrimeFragment  : Fragment(), DatePickerFragment.Callbacks{
         solvedCheckBox = view.findViewById(R.id.crime_solved) as CheckBox
         reportButton = view?.findViewById(R.id.crime_report) as Button
         suspectButton = view.findViewById(R.id.crime_suspect) as Button
+        photoButton = view.findViewById(R.id.crime_camera) as ImageButton
+        photoView = view.findViewById(R.id.crime_photo) as ImageView
 
         return view
     }
@@ -140,14 +141,24 @@ class CrimeFragment  : Fragment(), DatePickerFragment.Callbacks{
                 startActivity(chooserIntent)
             }
         }
-
+        //Set up susspect button
         suspectButton.apply {
             val pickContactIntent = Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI)
 
             setOnClickListener {
                 startActivityForResult(pickContactIntent, REQUEST_CONTACT)
             }
+            //Check to make sure an activity exists to handle this request, if not, cancel the req
+            //request by disabling the .apply
+            val packageManager: PackageManager = requireActivity().packageManager
+            val resolvedActivity: ResolveInfo? =
+                packageManager.resolveActivity(pickContactIntent,
+                    PackageManager.MATCH_DEFAULT_ONLY)
+            if (resolvedActivity == null){
+                isEnabled = false
+            }
         }
+
     }
     //----------------------------------------------------------------------------------------------
 
@@ -173,6 +184,7 @@ class CrimeFragment  : Fragment(), DatePickerFragment.Callbacks{
     }
     //----------------------------------------------------------------------------------------------
 
+    //----------------------------------------------------------------------------------------------
     private fun getCrimeReport(): String {
         val solvedString = if(crime.isSolved){
             getString(R.string.crime_report_solved)
@@ -191,6 +203,7 @@ class CrimeFragment  : Fragment(), DatePickerFragment.Callbacks{
     }
     //----------------------------------------------------------------------------------------------
 
+    //----------------------------------------------------------------------------------------------
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when {
             resultCode != Activity.RESULT_OK -> return
@@ -221,6 +234,7 @@ class CrimeFragment  : Fragment(), DatePickerFragment.Callbacks{
             }
         }
     }
+    //----------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------
     companion object {
