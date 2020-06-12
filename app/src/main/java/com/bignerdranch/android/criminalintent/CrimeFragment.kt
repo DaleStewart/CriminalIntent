@@ -1,6 +1,9 @@
 package com.bignerdranch.android.criminalintent
 
+import android.app.Activity
 import android.content.Intent
+import android.net.Uri
+
 import android.nfc.Tag
 import android.os.Bundle
 import android.provider.ContactsContract
@@ -17,6 +20,7 @@ import android.widget.CheckBox
 import android.widget.EditText
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
+import java.net.URI
 import java.util.*
 
 private const val ARG_CRIME_ID = "crime_id"
@@ -184,6 +188,38 @@ class CrimeFragment  : Fragment(), DatePickerFragment.Callbacks{
         }
 
         return getString(R.string.crime_report, crime.title, dateString, solvedString, suspect)
+    }
+    //----------------------------------------------------------------------------------------------
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        when {
+            resultCode != Activity.RESULT_OK -> return
+
+            requestCode == REQUEST_CONTACT && data != null -> {
+                val contactUri: Uri? = data.data
+                //specifywhich fieelds you want your query to return values for
+                val queryFields = arrayOf(ContactsContract.Contacts.DISPLAY_NAME)
+                //perform query thecontacUri is a "where" of the search
+                val cursor = contactUri?.let {
+                    requireActivity().contentResolver
+                        .query(it, queryFields, null, null, null)
+                }
+                cursor?.use {
+                    //verify cursor contains atleast one result
+                    if (it.count == 0) {
+                            return
+                        }
+
+                    //pull out the first column of the first row of data
+                    //that is suspects name
+                    it.moveToFirst()
+                    val suspect = it.getString(0)
+                    crime.suspect = suspect
+                    crimeDetailViewModel.saveCrime(crime)
+                    suspectButton.text = suspect
+                }
+            }
+        }
     }
 
     //----------------------------------------------------------------------------------------------
