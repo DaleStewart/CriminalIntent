@@ -3,7 +3,8 @@ package com.bignerdranch.android.criminalintent
 import android.content.Intent
 import android.nfc.Tag
 import android.os.Bundle
-import android.provider.Settings.System.DATE_FORMAT
+import android.provider.ContactsContract
+
 import android.text.Editable
 import android.text.TextWatcher
 import android.text.format.DateFormat
@@ -22,6 +23,8 @@ private const val ARG_CRIME_ID = "crime_id"
 private const val TAG = "CrimeFragment"
 private const val DIALOG_DATE = "DialogDate"
 private const val REQUEST_DATE = 0
+private const val DATE_FORMAT = "EEE, MMM, dd"
+private const val REQUEST_CONTACT = 1
 
 class CrimeFragment  : Fragment(), DatePickerFragment.Callbacks{
 
@@ -31,6 +34,7 @@ class CrimeFragment  : Fragment(), DatePickerFragment.Callbacks{
     private lateinit var dateButton: Button
     private lateinit var solvedCheckBox: CheckBox
     private lateinit var reportButton: Button
+    private lateinit var suspectButton: Button
 
     //view model to hold our data, nessesary since device rotation might mess things up
     private val crimeDetailViewModel: CrimeDetailViewModel by lazy {
@@ -44,7 +48,7 @@ class CrimeFragment  : Fragment(), DatePickerFragment.Callbacks{
         //get a reference to the UUID of the crime we must load from the database
         val crimeId: UUID = arguments?.getSerializable(ARG_CRIME_ID) as UUID
         crimeDetailViewModel.loadCrime(crimeId)
-        reportButton = view?.findViewById(R.id.crime_report) as Button
+
     }
     //----------------------------------------------------------------------------------------------
 
@@ -58,6 +62,8 @@ class CrimeFragment  : Fragment(), DatePickerFragment.Callbacks{
         titleField = view.findViewById(R.id.crime_title) as EditText//todo test without: as EditText
         dateButton = view.findViewById(R.id.crime_date) as Button
         solvedCheckBox = view.findViewById(R.id.crime_solved) as CheckBox
+        reportButton = view?.findViewById(R.id.crime_report) as Button
+        suspectButton = view.findViewById(R.id.crime_suspect) as Button
 
         return view
     }
@@ -130,6 +136,14 @@ class CrimeFragment  : Fragment(), DatePickerFragment.Callbacks{
                 startActivity(chooserIntent)
             }
         }
+
+        suspectButton.apply {
+            val pickContactIntent = Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI)
+
+            setOnClickListener {
+                startActivityForResult(pickContactIntent, REQUEST_CONTACT)
+            }
+        }
     }
     //----------------------------------------------------------------------------------------------
 
@@ -147,6 +161,10 @@ class CrimeFragment  : Fragment(), DatePickerFragment.Callbacks{
         solvedCheckBox.apply {
             isChecked = crime.isSolved
             jumpDrawablesToCurrentState()//skip the animaion if it is set by UpdateUI
+        }
+
+        if(crime.suspect.isNotEmpty()){
+            suspectButton.text = crime.suspect
         }
     }
     //----------------------------------------------------------------------------------------------
